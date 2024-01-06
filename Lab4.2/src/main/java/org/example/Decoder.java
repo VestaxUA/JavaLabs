@@ -6,14 +6,17 @@ import java.util.regex.Pattern;
 public class Decoder {
 
     public static String decodeWord(String encodedWord) {
-        Pattern numberPattern = Pattern.compile(".*\\d.*");
-        Matcher matcher = numberPattern.matcher(encodedWord);
-
-        if (matcher.find()) {
+        if (containsNumbers(encodedWord)) {
             return decodeVowelReplacement(encodedWord);
         } else {
             return decodeConsonantReplacement(encodedWord);
         }
+    }
+
+    private static boolean containsNumbers(String word) {
+        Pattern numberPattern = Pattern.compile(".*\\d.*");
+        Matcher matcher = numberPattern.matcher(word);
+        return matcher.find();
     }
 
     private static String decodeVowelReplacement(String encodedWord) {
@@ -27,6 +30,7 @@ public class Decoder {
 
     private static String decodeConsonantReplacement(String encodedWord) {
         StringBuilder decodedWord = new StringBuilder();
+
         for (char c : encodedWord.toCharArray()) {
             if (Character.isLetter(c)) {
                 char decodedChar = findPreviousConsonant(c);
@@ -35,6 +39,7 @@ public class Decoder {
                 decodedWord.append(c);
             }
         }
+
         return decodedWord.toString();
     }
 
@@ -50,3 +55,4 @@ public class Decoder {
         return alphabet[previousIndex];
     }
 }
+
