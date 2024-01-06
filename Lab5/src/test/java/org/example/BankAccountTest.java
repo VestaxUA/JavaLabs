@@ -7,16 +7,15 @@ class BankAccountTest {
 
     @Test
     public void testDeposit() throws NegativeAmountException {
-        BankAccount account = new BankAccount();
+        BankAccount account = new BankAccount(1, "Account1", 0);
         account.deposit(100.0);
-        assertEquals(100.0, account.getBalance());
+        assertEquals(100.0, account.getBalance(), 0.001);
     }
 
     @Test
-    public void withdraw () throws InsufficientFundsException, NegativeAmountException {
-        BankAccount account = new BankAccount();
-        account.deposit(200.0);
+    public void testWithdraw() throws InsufficientFundsException, NegativeAmountException {
+        BankAccount account = new BankAccount(2, "Account2", 200.0);
         account.withdraw(50.0);
-        assertEquals(150.0, account.getBalance());
+        assertEquals(150.0, account.getBalance(), 0.001);
     }
 }

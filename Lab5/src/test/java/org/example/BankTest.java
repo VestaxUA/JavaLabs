@@ -1,34 +1,70 @@
 package org.example;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class BankTest {
+public class BankTest {
+    private Bank bank;
 
-    @Test
-    public void testCreateAccount() throws NegativeAmountException {
-        Bank bank = new Bank();
-        bank.createAccount("Joe", 200.0, 1);
-        assertEquals(1, bank.getAccounts().size());
+    @BeforeEach
+    public void setUp() {
+        bank = new Bank();
     }
 
     @Test
-    void testFindAccount() throws AccountNotFoundException, NegativeAmountException {
-        Bank bank = new Bank();
-        bank.createAccount("Hanna", 300.0, 1);
-        BankAccount foundAccount = bank.findAccount(1);
+    public void testCreateAccount() {
+        BankAccount account = bank.createAccount("TestAccount1", 1000);
+        assertNotNull(account);
+        assertEquals("TestAccount1", account.getAccountName());
+        assertEquals(1000, account.getBalance(), 0.001);
+    }
+
+    @Test
+    public void testFindAccount() throws AccountNotFoundException {
+        BankAccount account = bank.createAccount("TestAccount2", 500);
+        int accountNumber = account.getAccountNumber();
+
+        BankAccount foundAccount = bank.findAccount(accountNumber);
         assertNotNull(foundAccount);
-        assertEquals("Hanna", foundAccount.getAccountName());
+        assertEquals(accountNumber, foundAccount.getAccountNumber());
+        assertEquals("TestAccount2", foundAccount.getAccountName());
+        assertEquals(500, foundAccount.getBalance(), 0.001);
     }
 
     @Test
-    public void testTransferMoney() throws AccountNotFoundException, NegativeAmountException, InsufficientFundsException {
-        Bank bank = new Bank();
-        bank.createAccount("Esmeralda", 500.0, 1);
-        bank.createAccount("Hector", 350.0, 2);
+    public void testTransferMoney() throws AccountNotFoundException, InsufficientFundsException, NegativeAmountException {
+        BankAccount account1 = bank.createAccount("TestAccount1", 1000);
+        BankAccount account2 = bank.createAccount("TestAccount2", 500);
 
-        bank.transferMoney(1, 2, 75.0);
-        assertEquals(425.0, bank.findAccount(1).getBalance());
-        assertEquals(425.0, bank.findAccount(2).getBalance());
+        bank.transferMoney(account1.getAccountNumber(), account2.getAccountNumber(), 300);
+
+        assertEquals(700, account1.getBalance(), 0.001);
+        assertEquals(800, account2.getBalance(), 0.001);
+    }
+
+    @Test
+    public void testTransferMoneyWithInsufficientFunds() throws AccountNotFoundException, InsufficientFundsException, NegativeAmountException {
+        assertThrows(InsufficientFundsException.class, () -> {
+            BankAccount account1 = bank.createAccount("TestAccount1", 100);
+            BankAccount account2 = bank.createAccount("TestAccount2", 500);
+
+            bank.transferMoney(account1.getAccountNumber(), account2.getAccountNumber(), 200); // Trying to transfer more than the balance of account1
+        });
+    }
+
+    @Test
+    public void testFindNonexistentAccount() {
+        assertThrows(AccountNotFoundException.class, () -> {
+            bank.findAccount(12345); // Assuming 12345 is a non-existent account number
+        });
+    }
+
+    @Test
+    public void testNegativeDeposit() throws NegativeAmountException {
+        assertThrows(NegativeAmountException.class, () -> {
+            BankAccount account = bank.createAccount("TestAccount1", 1000);
+            account.deposit(-200); // Trying to deposit a negative amount
+        });
     }
 }

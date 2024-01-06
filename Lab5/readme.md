@@ -32,50 +32,90 @@ public class BankAccount {
    private String accountName;
    private double balance;
 
+   public BankAccount(int accountNumber, String accountName, double initialDeposit) {
+      this.accountNumber = accountNumber;
+      this.accountName = accountName;
+      this.balance = initialDeposit;
+   }
 
-   public void deposit (double amount) throws NegativeAmountException {
+   public void deposit(double amount) throws NegativeAmountException {
       if (amount < 0) {
-         throw new NegativeAmountException("Negative amount in the deposit");
+         throw new NegativeAmountException("Amount for deposit cannot be negative.");
       }
       balance += amount;
    }
 
-   public void withdraw(double amount) throws InsufficientFundsException {
-      if (balance < amount) {
-         throw new InsufficientFundsException("Insufficient funds in the account");
+   public void withdraw(double amount) throws NegativeAmountException, InsufficientFundsException {
+      if (amount < 0) {
+         throw new NegativeAmountException("Amount for withdrawal cannot be negative.");
+      }
+      if (amount > balance) {
+         throw new InsufficientFundsException("Insufficient funds for withdrawal.");
       }
       balance -= amount;
    }
 
-   public double getBalance () {
+   public double getBalance() {
       return balance;
    }
 
-   public void getAccountSummary() {
-      System.out.println("Account Number is _ " + accountNumber + "\n" +
-              "Account Name is _ "   + accountName   + "\n" +
-              "Account Balance is _ "+ balance);
+   public String getAccountSummary() {
+      return "Account Number: " + accountNumber + ", Account Name: " + accountName + ", Balance: " + balance;
    }
 
-   public int getAccountNumber () {
+   public int getAccountNumber() {
       return accountNumber;
-   }
-
-   public void setAccountNumber (int accountNumber) {
-      this.accountNumber = accountNumber;
    }
 
    public String getAccountName () {
       return accountName;
    }
+}
+```
 
-   public void setAccountName (String accountName) {
-      this.accountName = accountName;
+Вигляд класу `Bank` :
+```java
+package org.example;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Bank {
+   private List<BankAccount> accounts;
+
+   public Bank() {
+      this.accounts = new ArrayList<>();
+   }
+
+   public BankAccount createAccount(String accountName, double initialDeposit) {
+      int accountNumber = generateAccountNumber();
+      BankAccount account = new BankAccount(accountNumber, accountName, initialDeposit);
+      accounts.add(account);
+      return account;
+   }
+
+   public BankAccount findAccount(int accountNumber) throws AccountNotFoundException {
+      for (BankAccount account : accounts) {
+         if (account.getAccountNumber() == accountNumber) {
+            return account;
+         }
+      }
+      throw new AccountNotFoundException("Account with number " + accountNumber + " not found.");
+   }
+
+   public void transferMoney(int fromAccountNumber, int toAccountNumber, double amount)
+           throws AccountNotFoundException, InsufficientFundsException, NegativeAmountException {
+      BankAccount fromAccount = findAccount(fromAccountNumber);
+      BankAccount toAccount = findAccount(toAccountNumber);
+
+      fromAccount.withdraw(amount);
+      toAccount.deposit(amount);
+   }
+
+   private int generateAccountNumber() {
+      return accounts.size() + 1;
    }
 }
-
-
-
 
 ```
 
@@ -85,88 +125,72 @@ public class BankAccount {
 ```java
 package org.example;
 
-// InsufficientFundsException.java
 public class InsufficientFundsException extends Exception {
    public InsufficientFundsException(String message) {
       super(message);
    }
 }
 ```
+
 - `NegativeAmountException` :
 ```java
 package org.example;
 
-// NegativeAmountException.java
 public class NegativeAmountException extends Exception {
    public NegativeAmountException(String message) {
       super(message);
    }
 }
 ```
+
 - `AccountNotFoundException` :
 ```java
 package org.example;
 
-// AccountNotFoundException.java
 public class AccountNotFoundException extends Exception {
    public AccountNotFoundException(String message) {
       super(message);
    }
 }
-
 ```
 
-Вигляд класу `Bank` :
+Вигляд класу `Main`, цей клас був створений для запуску програми
 ```java
 package org.example;
 
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Bank bank = new Bank();
 
-import java.util.ArrayList;
-import java.util.List;
+            BankAccount account1 = bank.createAccount("Client1", 2300);
+            BankAccount account2 = bank.createAccount("Client2", 540);
 
-public class Bank {
-   private final List<BankAccount> accounts;
+            System.out.println(account1.getAccountSummary());
+            System.out.println(account2.getAccountSummary());
 
-   public Bank() {
-      this.accounts = new ArrayList<>();
-   }
+            account1.withdraw(200);
+            account2.deposit(200);
 
-   public void createAccount(String accountName, double initialDeposit, int accountNumber) throws NegativeAmountException {
-      BankAccount newAccount = new BankAccount();
-      newAccount.setAccountNumber(accountNumber);
-      newAccount.deposit(initialDeposit);
-      newAccount.setAccountName(accountName);
-      accounts.add(newAccount);
-   }
+            System.out.println(account1.getAccountSummary());
+            System.out.println(account2.getAccountSummary());
 
-   public BankAccount findAccount(int accountNumber) throws AccountNotFoundException {
-      for (BankAccount account : accounts) {
-         if (account.getAccountNumber() == (accountNumber)) {
-            return account;
-         }
-      }
-      throw new AccountNotFoundException("Account with number " + accountNumber + " not found");
-   }
+            bank.transferMoney(account1.getAccountNumber(), account2.getAccountNumber(), 300);
 
-   public void transferMoney (int fromAccountNumber, int toAccountNumber, double amount)
-           throws AccountNotFoundException, InsufficientFundsException {
+            System.out.println(account1.getAccountSummary());
+            System.out.println(account2.getAccountSummary());
 
-      BankAccount fromAccount = findAccount(fromAccountNumber);
-      BankAccount toAccount = findAccount(toAccountNumber);
-
-      fromAccount.withdraw(amount);
-      try {
-         toAccount.deposit(amount);
-      } catch (NegativeAmountException e) {
-         throw new RuntimeException(e);
-      }
-   }
-
-   public List<BankAccount> getAccounts() {
-      return accounts;
-   }
+        } catch (NegativeAmountException | InsufficientFundsException | AccountNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
+
 ```
+
+
+
 Тестові класи :
 - `BankAccountTest` :
 ```java
@@ -177,59 +201,96 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BankAccountTest {
 
-    @Test
-    public void testDeposit() throws NegativeAmountException {
-        BankAccount account = new BankAccount();
-        account.deposit(100.0);
-        assertEquals(100.0, account.getBalance());
-    }
+   @Test
+   public void testDeposit() throws NegativeAmountException {
+      BankAccount account = new BankAccount(1, "Account1", 0);
+      account.deposit(100.0);
+      assertEquals(100.0, account.getBalance(), 0.001);
+   }
 
-    @Test
-    public void withdraw () throws InsufficientFundsException, NegativeAmountException {
-        BankAccount account = new BankAccount();
-        account.deposit(200.0);
-        account.withdraw(50.0);
-        assertEquals(150.0, account.getBalance());
-    }
+   @Test
+   public void testWithdraw() throws InsufficientFundsException, NegativeAmountException {
+      BankAccount account = new BankAccount(2, "Account2", 200.0);
+      account.withdraw(50.0);
+      assertEquals(150.0, account.getBalance(), 0.001);
+   }
 }
+
 ```
 - `BankTest` :
 ```java
 package org.example;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class BankTest {
+public class BankTest {
+   private Bank bank;
 
-    @Test
-    public void testCreateAccount() throws NegativeAmountException {
-        Bank bank = new Bank();
-        bank.createAccount("Joe", 200.0, 1);
-        assertEquals(1, bank.getAccounts().size());
-    }
+   @BeforeEach
+   public void setUp() {
+      bank = new Bank();
+   }
 
-    @Test
-    void testFindAccount() throws AccountNotFoundException, NegativeAmountException {
-        Bank bank = new Bank();
-        bank.createAccount("Hanna", 300.0, 1);
-        BankAccount foundAccount = bank.findAccount(1);
-        assertNotNull(foundAccount);
-        assertEquals("Hanna", foundAccount.getAccountName());
-    }
+   @Test
+   public void testCreateAccount() {
+      BankAccount account = bank.createAccount("TestAccount1", 1000);
+      assertNotNull(account);
+      assertEquals("TestAccount1", account.getAccountName());
+      assertEquals(1000, account.getBalance(), 0.001);
+   }
 
-    @Test
-    public void testTransferMoney() throws AccountNotFoundException, NegativeAmountException, InsufficientFundsException {
-        Bank bank = new Bank();
-        bank.createAccount("Esmeralda", 500.0, 1);
-        bank.createAccount("Hector", 350.0, 2);
+   @Test
+   public void testFindAccount() throws AccountNotFoundException {
+      BankAccount account = bank.createAccount("TestAccount2", 500);
+      int accountNumber = account.getAccountNumber();
 
-        bank.transferMoney(1, 2, 75.0);
-        assertEquals(425.0, bank.findAccount(1).getBalance());
-        assertEquals(425.0, bank.findAccount(2).getBalance());
-    }
+      BankAccount foundAccount = bank.findAccount(accountNumber);
+      assertNotNull(foundAccount);
+      assertEquals(accountNumber, foundAccount.getAccountNumber());
+      assertEquals("TestAccount2", foundAccount.getAccountName());
+      assertEquals(500, foundAccount.getBalance(), 0.001);
+   }
+
+   @Test
+   public void testTransferMoney() throws AccountNotFoundException, InsufficientFundsException, NegativeAmountException {
+      BankAccount account1 = bank.createAccount("TestAccount1", 1000);
+      BankAccount account2 = bank.createAccount("TestAccount2", 500);
+
+      bank.transferMoney(account1.getAccountNumber(), account2.getAccountNumber(), 300);
+
+      assertEquals(700, account1.getBalance(), 0.001);
+      assertEquals(800, account2.getBalance(), 0.001);
+   }
+
+   @Test
+   public void testTransferMoneyWithInsufficientFunds() throws AccountNotFoundException, InsufficientFundsException, NegativeAmountException {
+      assertThrows(InsufficientFundsException.class, () -> {
+         BankAccount account1 = bank.createAccount("TestAccount1", 100);
+         BankAccount account2 = bank.createAccount("TestAccount2", 500);
+
+         bank.transferMoney(account1.getAccountNumber(), account2.getAccountNumber(), 200); // Trying to transfer more than the balance of account1
+      });
+   }
+
+   @Test
+   public void testFindNonexistentAccount() {
+      assertThrows(AccountNotFoundException.class, () -> {
+         bank.findAccount(12345); // Assuming 12345 is a non-existent account number
+      });
+   }
+
+   @Test
+   public void testNegativeDeposit() throws NegativeAmountException {
+      assertThrows(NegativeAmountException.class, () -> {
+         BankAccount account = bank.createAccount("TestAccount1", 1000);
+         account.deposit(-200); // Trying to deposit a negative amount
+      });
+   }
 }
 ```
 Тестування показало, що все працює належним чином.
+![img.png](img.png)
 
 pom.xml буде знаходитись в основній теці лабораторної роботи
