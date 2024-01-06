@@ -1,21 +1,20 @@
 package org.example;
 
 public class Main {
-        public static boolean isPalindrome (String word){
-
-            word = word.replaceAll("\\s", "").toLowerCase();
-
-            String reversedWord = new StringBuilder(word).reverse().toString();
-
-            return word.equals(reversedWord);
+    public static boolean isPalindrome(String word) {
+        if (word == null) {
+            return false;
         }
 
-        public static void main (String[]args){
-            String word = "A man a plan a canal Panama";
-            if (isPalindrome(word)) {
-                System.out.println(word + " is palindrome.");
-            } else {
-                System.out.println(word + " isn`t palindrome.");
-            }
-        }
+        String cleanWord = word.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+
+        return cleanWord.equals(new StringBuilder(cleanWord).reverse().toString());
+    }
+
+    public static void main(String[] args) {
+        System.out.println(isPalindrome("radar")); // true
+        System.out.println(isPalindrome("banana")); // false
+        System.out.println(isPalindrome("hannah")); // true
+        System.out.println(isPalindrome("A man a plan a canal Panama")); // false
+    }
 }
