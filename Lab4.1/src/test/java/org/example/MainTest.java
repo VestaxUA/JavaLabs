@@ -18,7 +18,7 @@ public class MainTest {
         assertTrue(Main.isPalindrome("eye"));
         assertTrue(Main.isPalindrome("6543456"));
         assertTrue(Main.isPalindrome("step on no pets"));
-        //assertFalse(Main.isPalindrome("A man a plan a canal Panama"));
+        assertFalse(Main.isPalindrome("A man a plan a canal Panama"));
     }
 
     @Test

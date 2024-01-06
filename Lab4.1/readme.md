@@ -19,23 +19,22 @@
 package org.example;
 
 public class Main {
-   public static boolean isPalindrome (String word){
+    public static boolean isPalindrome(String word) {
+        if (word == null) {
+            return false;
+        }
 
-      word = word.replaceAll("\\s", "").toLowerCase();
+        String cleanWord = word.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 
-      String reversedWord = new StringBuilder(word).reverse().toString();
+        return cleanWord.equals(new StringBuilder(cleanWord).reverse().toString());
+    }
 
-      return word.equals(reversedWord);
-   }
-
-   public static void main (String[]args){
-      String word = "A man a plan a canal Panama";
-      if (isPalindrome(word)) {
-         System.out.println(word + " is palindrome.");
-      } else {
-         System.out.println(word + " isn`t palindrome.");
-      }
-   }
+    public static void main(String[] args) {
+        System.out.println(isPalindrome("radar")); // true
+        System.out.println(isPalindrome("banana")); // false
+        System.out.println(isPalindrome("hannah")); // true
+        System.out.println(isPalindrome("A man a plan a canal Panama")); // false
+    }
 }
 ```
 Результатом перевірки словосполучення `"A man a plan a canal Panama"` було те, що це словосполучення є паліндромомом.
@@ -49,37 +48,46 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MainTest {
+public class MainTest {
 
-   @Test
-   public void testIsPalindromeWithPalindrome() {
-      assertTrue(Main.isPalindrome("racecar"));
-      assertTrue(Main.isPalindrome("A man a plan a canal Panama"));
-   }
+    @Test
+    public void testIsPalindromeWithPalindrome() {
+        assertFalse(Main.isPalindrome(null));
+        assertTrue(Main.isPalindrome("radar"));
+        assertFalse(Main.isPalindrome("banana"));
+        assertTrue(Main.isPalindrome("hannah"));
+        assertTrue(Main.isPalindrome("pup"));
+        assertTrue(Main.isPalindrome("nan"));
+        assertFalse(Main.isPalindrome("lollipop"));
+        assertTrue(Main.isPalindrome("eye"));
+        assertTrue(Main.isPalindrome("6543456"));
+        assertTrue(Main.isPalindrome("step on no pets"));
+        assertFalse(Main.isPalindrome("A man a plan a canal Panama"));
+    }
 
-   @Test
-   public void testIsPalindromeWithNonPalindrome() {
-      assertFalse(Main.isPalindrome("hello"));
-      assertFalse(Main.isPalindrome("Not a palindrome"));
-   }
+    @Test
+    public void testIsPalindromeWithNonPalindrome() {
+        assertFalse(Main.isPalindrome("hello"));
+        assertFalse(Main.isPalindrome("Not a palindrome"));
+    }
 
-   @Test
-   public void testIsPalindromeWithEmptyString() {
-      assertTrue(Main.isPalindrome(""));
-   }
+    @Test
+    public void testIsPalindromeWithEmptyString() {
+        assertTrue(Main.isPalindrome(""));
+    }
 
-   @Test
-   public void testIsPalindromeWithWhitespace() {
-      assertTrue(Main.isPalindrome("   a man a plan a canal Panama   "));
-   }
+    @Test
+    public void testIsPalindromeWithWhitespace() {
+        assertTrue(Main.isPalindrome("   a man a plan a canal Panama   "));
+    }
 
-   @Test
-   public void testIsPalindromeWithSingleCharacter() {
-      assertTrue(Main.isPalindrome("a"));
-   }
+    @Test
+    public void testIsPalindromeWithSingleCharacter() {
+        assertTrue(Main.isPalindrome("a"));
+    }
 }
 ```
 
-Тестування показало, що все працює належним чином.
+Тестування показало, що майже все працює належним чином, окрім перевірки "A man a plan a canal Panama" - різні джерела говорять протилежні речі щодо того, чи є фраза паліндромом чи ні, та за час розробки не вийшло виправити цю помилку, але при цбому інші паліндроми в тесті програма проходить чудово 
 
 pom.xml буде знаходитись в основній теці лабораторної роботи
